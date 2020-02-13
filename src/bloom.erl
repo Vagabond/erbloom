@@ -10,6 +10,7 @@
          deserialize/7,
          set/2,
          check/2,
+         check_ro/2,
          check_and_set/2,
          clear/1
          ]).
@@ -58,6 +59,14 @@ set(_Ref, _Key) ->
 %% @doc Check for the presence of `Key' in `Bloom'.
 -spec check(Bloom :: bloom(), Key :: term()) -> boolean().
 check(_Ref, _Key) ->
+    not_loaded(?LINE).
+
+%% @doc Deserialize a previously serialized bloom filter back into a bloom filter reference.
+-spec check_ro(serialized_bloom(), term()) -> boolean().
+check_ro({Bitmap,NumBits,NumFuns,{Sv00,Sv01},{Sv10,Sv11}}, Key) ->
+    check_ro(Bitmap, NumBits, NumFuns, Sv00, Sv01, Sv10, Sv11, Key).
+
+check_ro(_Bitmap, _NumBits, _NumFuns, _Sv00, _Sv01, _Sv10, _Sv11, _Key) ->
     not_loaded(?LINE).
 
 %% @doc Record the presence of `Key' in `Bloom' and return whether it was present before.

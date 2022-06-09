@@ -29,16 +29,16 @@ impl ForgetfulFilter {
                     items_count: Some(items_count),
                     fp_rate: None,
                     ..
-                } => Bloom::new(bitmap_size, items_count),
+                } if bitmap_size > 0 && items_count > 0 => Bloom::new(bitmap_size, items_count),
                 FilterOptions {
                     bitmap_size: None,
                     items_count: Some(items_count),
                     fp_rate: Some(fp_rate),
                     ..
-                } => Bloom::new_for_fp_rate(items_count, fp_rate),
+                } if items_count > 0 && fp_rate > 0.0 && fp_rate < 1.0 => Bloom::new_for_fp_rate(items_count, fp_rate),
                 _ => {
                     return Err(format!(
-                        "must set `items_count` AND (`fp_rate` OR `bitmap_size`)], got {:?}",
+                        "must set `items_count > 0` AND (`1.0 > fp_rate > 0.0` OR `bitmap_size > 0`)], got {:?}",
                         opts
                     ))
                 }

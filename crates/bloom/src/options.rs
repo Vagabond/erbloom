@@ -1,4 +1,4 @@
-use filter::FilterType;
+use crate::filter::FilterType;
 use rustler::{Decoder, NifResult, Term};
 use serde::{Deserialize, Serialize};
 

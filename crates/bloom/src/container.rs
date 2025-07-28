@@ -1,5 +1,5 @@
+use crate::options::FilterOptions;
 use serde::{Deserialize, Serialize};
-use options::FilterOptions;
 
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
 pub struct RawSerializedFilter {

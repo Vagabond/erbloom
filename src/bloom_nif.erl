@@ -75,7 +75,7 @@ check_and_set(_Ref, _Key) ->
 clear(_Ref) ->
   not_loaded(?LINE).
 
--spec check_serialized(Bloom :: bloom(), Key :: term()) -> boolean().
+-spec check_serialized(Bloom :: serialized_bloom(), Key :: term()) -> boolean().
 check_serialized(_Ref, _Key) ->
   not_loaded(?LINE).
 

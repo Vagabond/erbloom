@@ -1,7 +1,7 @@
 use super::FilterType;
+use crate::container::{RawSerializedFilter, SerializedFilter};
+use crate::options::FilterOptions;
 use bloomfilter::Bloom;
-use container::{RawSerializedFilter, SerializedFilter};
-use options::FilterOptions;
 
 type Result<T> = std::result::Result<T, String>;
 
@@ -40,7 +40,7 @@ impl ForgetfulFilter {
                     return Err(format!(
                         "must set `items_count` AND (`fp_rate` OR `bitmap_size`)], got {:?}",
                         opts
-                    ))
+                    ));
                 }
             };
             filters.push(filter)

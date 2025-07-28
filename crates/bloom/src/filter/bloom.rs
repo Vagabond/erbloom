@@ -1,7 +1,7 @@
 use super::FilterType;
+use crate::container::{RawSerializedFilter, SerializedFilter};
+use crate::options::FilterOptions;
 use bloomfilter::Bloom;
-use container::{RawSerializedFilter, SerializedFilter};
-use options::FilterOptions;
 use siphasher::sip::SipHasher13;
 use std::hash::Hash;
 use std::hash::Hasher;
@@ -32,7 +32,7 @@ impl BloomFilter {
                     return Err(format!(
                         "must set `items_count` AND (`fp_rate` OR `bitmap_size`)], got {:?}",
                         opts
-                    ))
+                    ));
                 }
             },
         })

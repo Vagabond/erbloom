@@ -1,13 +1,12 @@
 use std::io::Write;
 use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
-use rustler::resource::ResourceArc;
-use rustler::{Binary, Encoder, Env, NifResult, OwnedBinary, Term};
+use rustler::{Binary, Encoder, Env, NifResult, OwnedBinary, Resource, ResourceArc, Term};
 
-use atoms::{bindecode, binencode, error, ok, wrong_filter_type};
-use container::SerializedFilter;
-use filter::{BloomFilter, Filter, FilterType};
-use options::FilterOptions;
+use crate::atoms::{bindecode, binencode, error, ok, wrong_filter_type};
+use crate::container::SerializedFilter;
+use crate::filter::{BloomFilter, Filter, FilterType};
+use crate::options::FilterOptions;
 
 // =================================================================================================
 // resource
@@ -15,6 +14,9 @@ use options::FilterOptions;
 
 #[repr(transparent)]
 struct FilterResource(RwLock<Filter>);
+
+#[rustler::resource_impl]
+impl Resource for FilterResource {}
 
 impl FilterResource {
     fn read(&self) -> RwLockReadGuard<'_, Filter> {
@@ -32,8 +34,7 @@ impl From<Filter> for FilterResource {
     }
 }
 
-pub fn on_load(env: Env, _load_info: Term) -> bool {
-    rustler::resource!(FilterResource, env);
+pub fn on_load(_env: Env, _load_info: Term) -> bool {
     true
 }
 
@@ -79,7 +80,11 @@ fn deserialize<'a>(env: Env<'a>, serialized: LazyBinary<'a>) -> NifResult<Term<'
 }
 
 #[rustler::nif]
-fn set<'a>(env: Env<'a>, resource: ResourceArc<FilterResource>, key: LazyBinary<'a>) -> NifResult<Term<'a>> {
+fn set<'a>(
+    env: Env<'a>,
+    resource: ResourceArc<FilterResource>,
+    key: LazyBinary<'a>,
+) -> NifResult<Term<'a>> {
     let mut filt_guard = resource.write();
     match &mut *filt_guard {
         Filter::Forgetful(filt) => {
@@ -94,7 +99,11 @@ fn set<'a>(env: Env<'a>, resource: ResourceArc<FilterResource>, key: LazyBinary<
 }
 
 #[rustler::nif]
-fn vcheck<'a>(env: Env<'a>, resource: ResourceArc<FilterResource>, key: LazyBinary<'a>) -> NifResult<Term<'a>> {
+fn vcheck<'a>(
+    env: Env<'a>,
+    resource: ResourceArc<FilterResource>,
+    key: LazyBinary<'a>,
+) -> NifResult<Term<'a>> {
     let filt_guard = resource.read();
     Ok(filt_guard.check(&key).encode(env))
 }
@@ -123,7 +132,11 @@ fn clear<'a>(env: Env<'a>, resource: ResourceArc<FilterResource>) -> NifResult<T
 // the hash keys manually and check them inside the Erlang binary by hand
 // for a 50mb bloom, this improves checking a serialized bloom from 25 seconds to 35 microseconds
 #[rustler::nif]
-fn check_serialized<'a>(env: Env<'a>, serialized: LazyBinary<'a>, key: LazyBinary<'a>) -> NifResult<Term<'a>> {
+fn check_serialized<'a>(
+    env: Env<'a>,
+    serialized: LazyBinary<'a>,
+    key: LazyBinary<'a>,
+) -> NifResult<Term<'a>> {
     match bincode::deserialize::<SerializedFilter>(&serialized) {
         Ok(f) => match f.opts.filter_type {
             Some(FilterType::Bloom) => {
@@ -149,7 +162,6 @@ fn check_serialized<'a>(env: Env<'a>, serialized: LazyBinary<'a>, key: LazyBinar
         Err(_e) => Ok((error(), bindecode()).encode(env)),
     }
 }
-
 
 // =================================================================================================
 // helpers
